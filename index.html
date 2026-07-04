@@ -25,6 +25,74 @@
             padding: 20px;
         }
 
+        /* PANTALLA DE LOGUEO */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease, pointer-events 0.5s;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-card h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .login-card p {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: background 0.2s;
+        }
+
+        .btn-google:hover {
+            background-color: #f8fafc;
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* CONTENIDO PRINCIPAL (Oculto antes de loguearse) */
+        .app-content {
+            display: none;
+        }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -35,20 +103,25 @@
             text-align: center;
             margin-bottom: 30px;
             position: relative;
-            padding-right: 180px;
+            padding-right: 320px;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             header { padding-right: 0; text-align: left; }
-            .btn-historial-top { position: static !important; margin-bottom: 15px; width: 100%; text-align: center; }
+            .header-buttons { position: static !important; margin-top: 15px; display: flex; gap: 10px; }
         }
 
         h1 { color: var(--primary); margin-bottom: 5px; margin-top: 0; }
 
-        .btn-historial-top {
+        .header-buttons {
             position: absolute;
             top: 10px;
             right: 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-historial-top {
             background-color: #475569;
             color: white;
             padding: 12px 20px;
@@ -60,6 +133,19 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
         .btn-historial-top:hover { background-color: #334155; }
+
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .btn-logout:hover { background-color: #b91c1c; }
 
         .grid {
             display: grid;
@@ -176,63 +262,79 @@
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>Sistema de Gestión de Clientes</h1>
-        <p>Conectado a Firebase Firestore Cloud ☁️</p>
-        <button class="btn-historial-top" onclick="abrirModal()">📜 Ver Historial</button>
-    </header>
+<div class="login-screen" id="login-screen">
+    <div class="login-card">
+        <h2>Bienvenido</h2>
+        <p>Por favor, inicia sesión para acceder al Sistema de Gestión de Clientes.</p>
+        <button class="btn-google" id="btn-login-google">
+            <img src="https://fonts.gstatic.com/ea/notosansjp/v5/featured/google.png" alt="Google Logo">
+            Iniciar sesión con Google
+        </button>
+    </div>
+</div>
 
-    <div class="grid">
-        <div>
-            <div class="card">
-                <h2 id="form-title">Agregar Nuevo Cliente</h2>
-                <form id="client-form">
-                    <input type="hidden" id="edit-id">
-                    
-                    <div class="form-group">
-                        <label for="nombre">Nombre Completo:</label>
-                        <input type="text" id="nombre" required placeholder="Ej: Juan Pérez">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="telefono">Teléfono / Celular:</label>
-                        <input type="tel" id="telefono" required placeholder="Ej: 3101234567">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Correo Electrónico:</label>
-                        <input type="email" id="email" required placeholder="Ej: juan@correo.com">
-                    </div>
-                    
-                    <button type="submit" class="btn-submit" id="btn-save">Guardar Cliente</button>
-                    <button type="button" class="btn-cancel" id="btn-cancel-edit" style="display: none;" onclick="cancelarEdicion()">Cancelar Edición</button>
-                </form>
+<div class="app-content" id="app-content">
+    <div class="container">
+        <header>
+            <h1>Sistema de Gestión de Clientes</h1>
+            <p id="user-welcome">Cargando usuario... ☁️</p>
+            <div class="header-buttons">
+                <button class="btn-historial-top" onclick="abrirModal()">📜 Ver Historial</button>
+                <button class="btn-logout" id="btn-logout">🚪 Cerrar Sesión</button>
             </div>
-        </div>
+        </header>
 
-        <div>
-            <div class="card search-box">
-                <h2>🔍 Buscador General</h2>
-                <input type="text" id="search-input" oninput="filtrarClientes()" placeholder="Escribe para filtrar...">
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <h2 id="form-title">Agregar Nuevo Cliente</h2>
+                    <form id="client-form">
+                        <input type="hidden" id="edit-id">
+                        
+                        <div class="form-group">
+                            <label for="nombre">Nombre Completo:</label>
+                            <input type="text" id="nombre" required placeholder="Ej: Juan Pérez">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="telefono">Teléfono / Celular:</label>
+                            <input type="tel" id="telefono" required placeholder="Ej: 3101234567">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico:</label>
+                            <input type="email" id="email" required placeholder="Ej: juan@correo.com">
+                        </div>
+                        
+                        <button type="submit" class="btn-submit" id="btn-save">Guardar Cliente</button>
+                        <button type="button" class="btn-cancel" id="btn-cancel-edit" style="display: none;" onclick="cancelarEdicion()">Cancelar Edición</button>
+                    </form>
+                </div>
             </div>
 
-            <div class="card">
-                <h2>📋 Clientes Activos (Modificables / Eliminables)</h2>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Teléfono</th>
-                                <th>Email</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-clientes">
-                            <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando datos desde la nube...</td></tr>
-                        </tbody>
-                    </table>
+            <div>
+                <div class="card search-box">
+                    <h2>🔍 Buscador General</h2>
+                    <input type="text" id="search-input" oninput="filtrarClientes()" placeholder="Escribe para filtrar...">
+                </div>
+
+                <div class="card">
+                    <h2>📋 Clientes Activos (Modificables / Eliminables)</h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-clientes">
+                                <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando datos desde la nube...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -257,8 +359,7 @@
                         <th>Contacto</th>
                     </tr>
                 </thead>
-                <tbody id="tabla-historial">
-                    </tbody>
+                <tbody id="tabla-historial"></tbody>
             </table>
         </div>
     </div>
@@ -267,10 +368,13 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
-        getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy 
+        getFirestore, collection, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, writeBatch
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // IMPORTACIÓN DE AUTH
+    import { 
+        getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Tus credenciales de Firebase proporcionadas
     const firebaseConfig = {
         apiKey: "AIzaSyCwEsnjvF6lDKDrEsYnQN8nhHSLHJXNfqQ",
         authDomain: "clientes-ab848.firebaseapp.com",
@@ -281,37 +385,92 @@
         measurementId: "G-7J2DL55MET"
     };
 
-    // Inicializar Firebase e instancias
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-    // Referencias a colecciones en Cloud Firestore
     const clientesRef = collection(db, "clientes");
     const historialRef = collection(db, "historial");
 
     let todosLosClientes = []; 
     const form = document.getElementById('client-form');
+    
+    // Elementos de la interfaz de Login
+    const loginScreen = document.getElementById('login-screen');
+    const appContent = document.getElementById('app-content');
+    const userWelcome = document.getElementById('user-welcome');
 
-    // 1. ESCUCHAR CAMBIOS EN TIEMPO REAL (Clientes Activos)
-    onSnapshot(clientesRef, (snapshot) => {
-        todosLosClientes = [];
-        snapshot.forEach(doc => {
-            todosLosClientes.push({ id: doc.id, ...doc.data() });
-        });
-        renderizarClientes(todosLosClientes);
+    // ==========================================
+    // CONTROL DE AUTENTICACIÓN (AUTH)
+    // ==========================================
+
+    // Escucha activa del estado del usuario
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Usuario está logueado
+            loginScreen.style.opacity = '0';
+            setTimeout(() => loginScreen.style.display = 'none', 500);
+            appContent.style.display = 'block';
+            userWelcome.innerHTML = `Conectado como <strong>${user.displayName}</strong> (${user.email}) ☁️`;
+            
+            // Inicializar las escuchas en tiempo real solo si está logueado
+            activarEscuchasFirestore();
+        } else {
+            // Usuario no está logueado
+            loginScreen.style.display = 'flex';
+            setTimeout(() => loginScreen.style.opacity = '1', 50);
+            appContent.style.display = 'none';
+        }
     });
 
-    // 2. ESCUCHAR CAMBIOS EN TIEMPO REAL (Historial inmutable ordenado por el más reciente)
-    const qHistorial = query(historialRef, orderBy("timestamp", "desc"));
-    onSnapshot(qHistorial, (snapshot) => {
-        const listaHistorial = [];
-        snapshot.forEach(doc => {
-            listaHistorial.push(doc.data());
-        });
-        renderizarHistorial(listaHistorial);
+    // Eventos de botones Auth
+    document.getElementById('btn-login-google').addEventListener('click', async () => {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            console.error("Error al loguearse con Google:", error);
+            alert("No se pudo iniciar sesión.");
+        }
     });
 
-    // 3. ENVIAR FORMULARIO (Crear o Editar en Firebase)
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+        if (confirm("¿Seguro que deseas cerrar sesión?")) {
+            await signOut(auth);
+        }
+    });
+
+    // ==========================================
+    // LOGICA FIRESTORE
+    // ==========================================
+    let unsubscribeClientes = null;
+    let unsubscribeHistorial = null;
+
+    function activarEscuchasFirestore() {
+        if(unsubscribeClientes) unsubscribeClientes();
+        if(unsubscribeHistorial) unsubscribeHistorial();
+
+        // 1. Escuchar clientes activos
+        unsubscribeClientes = onSnapshot(clientesRef, (snapshot) => {
+            todosLosClientes = [];
+            snapshot.forEach(doc => {
+                todosLosClientes.push({ id: doc.id, ...doc.data() });
+            });
+            renderizarClientes(todosLosClientes);
+        });
+
+        // 2. Escuchar historial
+        const qHistorial = query(historialRef, orderBy("timestamp", "desc"));
+        unsubscribeHistorial = onSnapshot(qHistorial, (snapshot) => {
+            const listaHistorial = [];
+            snapshot.forEach(doc => {
+                listaHistorial.push(doc.data());
+            });
+            renderizarHistorial(listaHistorial);
+        });
+    }
+
+    // Procesar Formulario
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -322,39 +481,39 @@
 
         try {
             if (id) {
-                // Modo Edición en Firebase
                 const docRef = doc(db, "clientes", id);
                 await updateDoc(docRef, { nombre, telefono, email });
-                alert("Cliente actualizado en la nube.");
+                alert("Cliente actualizado con éxito.");
             } else {
-                // Modo Creación en Firebase
-                await addDoc(clientesRef, { nombre, telefono, email });
-                
-                // Respaldo Inmutable automático al Historial
-                await addDoc(historialRef, {
+                const batch = writeBatch(db);
+                const nuevoClienteRef = doc(collection(db, "clientes"));
+                const nuevoHistorialRef = doc(collection(db, "historial"));
+
+                batch.set(nuevoClienteRef, { nombre, telefono, email });
+                batch.set(nuevoHistorialRef, {
                     fecha: new Date().toLocaleString(),
                     timestamp: Date.now(),
                     nombre,
                     telefono,
                     email
                 });
+
+                await batch.commit();
+                alert("Cliente guardado e historial actualizado.");
             }
-            form.reset();
             cancelarEdicion();
-            document.getElementById('search-input').value = '';
         } catch (error) {
-            console.error("Error al procesar en Firebase: ", error);
-            alert("Hubo un error con la base de datos de Firebase.");
+            console.error("Error en Firebase: ", error);
+            alert("Hubo un error al guardar los datos.");
         }
     });
 
-    // Renderizar tabla principal
     function renderizarClientes(lista) {
         const tbody = document.getElementById('tabla-clientes');
         tbody.innerHTML = '';
 
         if(lista.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay clientes en la base de datos</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay clientes activos</td></tr>`;
             return;
         }
 
@@ -371,13 +530,11 @@
             `;
             tbody.appendChild(tr);
 
-            // Vinculamos listeners de eventos locales para que funcionen dentro del entorno de módulos
             document.getElementById(`edit-${c.id}`).addEventListener('click', () => cargarEdicion(c));
             document.getElementById(`del-${c.id}`).addEventListener('click', () => eliminarCliente(c.id));
         });
     }
 
-    // Renderizar Historial en el Modal
     function renderizarHistorial(lista) {
         const tbody = document.getElementById('tabla-historial');
         tbody.innerHTML = '';
@@ -410,24 +567,24 @@
     }
 
     async function eliminarCliente(id) {
-        if (confirm("¿Estás seguro de eliminar este cliente? Permanecerá en el historial de respaldos en la nube.")) {
+        if (confirm("¿Estás seguro de eliminar este cliente? Permanecerá en el historial.")) {
             try {
-                const docRef = doc(db, "clientes", id);
-                await deleteDoc(docRef);
-                if(document.getElementById('edit-id').value == id) cancelarEdicion();
+                await deleteDoc(doc(db, "clientes", id));
+                if(document.getElementById('edit-id').value === id) cancelarEdicion();
             } catch (error) {
-                console.error("Error al eliminar de Firestore: ", error);
+                console.error("Error al eliminar: ", error);
             }
         }
     }
 
-    // Mapeo a funciones globales 'window' para que sigan funcionando los triggers del HTML
     window.cancelarEdicion = function() {
         document.getElementById('edit-id').value = '';
         document.getElementById('form-title').innerText = "Agregar Nuevo Cliente";
         document.getElementById('btn-save').innerText = "Guardar Cliente";
         document.getElementById('btn-cancel-edit').style.display = "none";
         form.reset();
+        document.getElementById('search-input').value = '';
+        renderizarClientes(todosLosClientes);
     };
 
     window.filtrarClientes = function() {
@@ -442,7 +599,7 @@
 </script>
 
 <script>
-    /* Controladores UI de la ventana flotante (Modal) */
+    /* Controladores UI del Modal */
     function abrirModal() { document.getElementById('historial-modal').classList.add('active'); }
     function cerrarModal() { document.getElementById('historial-modal').classList.remove('active'); }
     function cerrarModalExterno(event) {
